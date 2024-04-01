@@ -24,3 +24,13 @@ app.listen(3000,()=>{//تعريف السيرفر علي بورت 3000
 app.use('/api/user',userRouter) // 5 (1)
 app.use('/api/auth',authRouter)
 
+//midelware
+app.use((err,req,res,next)=>{
+    const statusCode = err.statusCode || 500;
+    const message = err.message || "Internal server error";
+    return res.status(statusCode).json({
+        success:false,
+        statusCode,
+        message,
+    });
+});
