@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from 'dotenv';
 import  userRouter from "./route/user.route.js" // 4 (1)
 import authRouter from "./route/auth.route.js";
+import cookieParser from "cookie-parser";
 dotenv.config();
 mongoose.connect(process.env.MONGO).then(()=>{
     console.log("Conected to MongoDb");
@@ -14,6 +15,7 @@ mongoose.connect(process.env.MONGO).then(()=>{
 
 const app = express();
 app.use(express.json())
+app.use(cookieParser())
 
 
 app.listen(3000,()=>{//تعريف السيرفر علي بورت 3000
