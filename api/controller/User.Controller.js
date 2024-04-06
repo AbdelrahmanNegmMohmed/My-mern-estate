@@ -33,3 +33,17 @@ export const updateuser = async (req, res, next) => {
     next(error);
   }
 };
+
+
+export const deleteuser = async (req, res, next) => {
+  if(req.user.id !== req.params.id){
+    return next(errorHandler(401,"you can only deleted your owen account"))
+  }
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.clearCookie('access_token')
+    res.status(200).json('user has been deleted!')
+  } catch (error) {
+    next(error)
+  }
+}

@@ -8,7 +8,14 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { app } from "../Firebase";
-import { updateuserFailure,ubdateuserSuccess,ubdateuserStart } from "../Redux/user/userslise.js";
+import {
+  updateuserFailure,
+  ubdateuserSuccess,
+  ubdateuserStart,
+  deleteuserStart,
+deleteuserSuccess,
+deleteuserFailure,
+} from "../Redux/user/userslise.js";
 
 export default function Profile() {
   const fileRef = useRef(null);
@@ -50,37 +57,52 @@ export default function Profile() {
       }
     );
   };
-  const handelchange=(e)=>{
+  const handelchange = (e) => {
     setformdata({
       ...formdata,
-      [e.target.id]:e.target.value
-    })
-  }
-  const handelsubmit = async(e)=>{
+      [e.target.id]: e.target.value,
+    });
+  };
+  const handelsubmit = async (e) => {
     e.preventDefault();
     try {
-      dispatch(ubdateuserStart())
-      const res = await fetch(`/api/user/update/${currentUser._id}`,{
-        method:"POST",
-        headers:{
-          'Content-Type': 'application/json',
+      dispatch(ubdateuserStart());
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        body:JSON.stringify(formdata),
+        body: JSON.stringify(formdata),
       });
       const data = await res.json();
-      if(data.success === false){
-        dispatch(updateuserFailure(data.message))
+      if (data.success === false) {
+        dispatch(updateuserFailure(data.message));
         return;
       }
-      dispatch(ubdateuserSuccess(data))
+      dispatch(ubdateuserSuccess(data));
       setUpdateSuccess(true);
-
-      
     } catch (error) {
       dispatch(updateuserFailure(error.message));
-      
     }
-  }
+  };
+  
+  const handeldeleteuser = async () => {
+    try {
+      dispatch(deleteuserFailure())
+      const res = await fetch(`/api/user/delete/${currentUser._id}`,{
+        method:"DELETE",
+
+      });
+      const data=await res.json();
+      if (data.success === false){
+        dispatch(deleteuserFailure(data.message))
+        return;
+      }
+      dispatch(deleteuserSuccess(data))
+    } catch (error) {
+      dispatch(deleteuserFailure(error.message))
+    }
+  };
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
@@ -94,19 +116,21 @@ export default function Profile() {
         />
         <img
           onClick={() => fileRef.current.click()}
-          src={formdata.avatar||currentUser.avatar}
+          src={formdata.avatar || currentUser.avatar}
           alt="profile"
           className="rounded-full h-24 w-24 object-cover cursor-pointer self-center mt-2"
         />
         <p className="text-sm self-center">
           {fileerror ? (
-            <span className="text-red-700">Error Image uploade (image must be less than 2 mb)</span>
+            <span className="text-red-700">
+              Error Image uploade (image must be less than 2 mb)
+            </span>
           ) : fileperc > 0 && fileperc < 100 ? (
             <span className="text-slate-700">{`Uploading ${fileperc}%`}</span>
           ) : fileperc === 100 ? (
             <span className="text-green-700">Image Successfully Uploaded</span>
           ) : (
-            ''
+            ""
           )}
         </p>
         <input
@@ -132,17 +156,25 @@ export default function Profile() {
           className="border p-3 rounded-lg"
           onChange={handelchange}
         />
-        <button disabled={loading} className="bg-slate-700 text-white rounded-lg p-3 uppercase hover:opacity-95 disabled:opacity-80">
-          {loading ? 'loading...':'update'}
+        <button
+          disabled={loading}
+          className="bg-slate-700 text-white rounded-lg p-3 uppercase hover:opacity-95 disabled:opacity-80"
+        >
+          {loading ? "loading..." : "update"}
         </button>
       </form>
       <div className="flex justify-between mt-5">
-        <span className="text-red-700 cursor-pointer">Delete account</span>
+        <span
+          onClick={handeldeleteuser}
+          className="text-red-700 cursor-pointer"
+        >
+          Delete account
+        </span>
         <span className="text-red-700 cursor-pointer">Sign out</span>
-      </div>  
-      <p className='text-red-700 mt-5'>{error?error:''}</p>
-      <p className='text-green-700 mt-5'>
-        {updateSuccess ? 'User is updated successfully!' : ''}
+      </div>
+      <p className="text-red-700 mt-5">{error ? error : ""}</p>
+      <p className="text-green-700 mt-5">
+        {updateSuccess ? "User is updated successfully!" : ""}
       </p>
     </div>
   );
